@@ -23,7 +23,6 @@ async def get_forecast(latitude: float, longitude: float, timezone: str) -> list
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "daily": "uv_index_max",
         "hourly": [
             "temperature_2m",
             "relative_humidity_2m",
@@ -31,6 +30,7 @@ async def get_forecast(latitude: float, longitude: float, timezone: str) -> list
             "precipitation_probability",
             "wind_speed_10m",
             "wind_direction_10m",
+            "uv_index"
         ],
         "timezone": timezone,
     }
@@ -47,6 +47,7 @@ async def get_forecast(latitude: float, longitude: float, timezone: str) -> list
     hourly_precipitation_probability = hourly.Variables(3).ValuesAsNumpy()
     hourly_wind_speed_10m = hourly.Variables(4).ValuesAsNumpy()
     hourly_wind_direction_10m = hourly.Variables(5).ValuesAsNumpy()
+    hourly_uv_index = hourly.Variables(6).ValuesAsNumpy()
 
     hourly_data = {
         "datetime": pd.date_range(
@@ -61,36 +62,14 @@ async def get_forecast(latitude: float, longitude: float, timezone: str) -> list
         "precipitation_probability": hourly_precipitation_probability,
         "wind_speed_10m": hourly_wind_speed_10m,
         "wind_direction_10m": hourly_wind_direction_10m,
+        "uv_index": hourly_uv_index,
     }
 
     hourly_dataframe = pd.DataFrame(data=hourly_data)
     hourly_dataframe = hourly_dataframe.head(24 * 3)
     hourly_dataframe["datetime"] = hourly_dataframe["datetime"].dt.tz_convert(timezone)
-    hourly_dataframe["date"] = hourly_dataframe["datetime"].dt.date
 
-    daily = response.Daily()
-    daily_uv_index_max = daily.Variables(0).ValuesAsNumpy()
-
-    daily_data = {
-        "datetime": pd.date_range(
-            start=pd.to_datetime(daily.Time(), unit="s", utc=True),
-            end=pd.to_datetime(daily.TimeEnd(), unit="s", utc=True),
-            freq=pd.Timedelta(seconds=daily.Interval()),
-            inclusive="left",
-        ),
-        "uv_index_max": daily_uv_index_max,
-    }
-
-    daily_dataframe = pd.DataFrame(data=daily_data)
-    daily_dataframe["datetime"] = daily_dataframe["datetime"].dt.tz_convert(timezone)
-    daily_dataframe["date"] = daily_dataframe["datetime"].dt.date
-
-    result = pd.merge(
-        hourly_dataframe, daily_dataframe, on="date", how="inner", suffixes=("", "_y")
-    )
-    result = result.drop("datetime_y", axis=1)
-
-    return result.to_dict("records")
+    return hourly_dataframe.to_dict("records")
 
 
 if __name__ == "__main__":
