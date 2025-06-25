@@ -17,7 +17,7 @@ async def get_preferred_drying_method() -> str:
 
 
 @mcp.tool()
-async def get_forecast(latitude: float, longitude: float) -> list[dict]:
+async def get_forecast(latitude: float, longitude: float, timezone: str) -> list[dict]:
     om = openmeteo_requests.AsyncClient()
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -32,7 +32,7 @@ async def get_forecast(latitude: float, longitude: float) -> list[dict]:
             "wind_speed_10m",
             "wind_direction_10m",
         ],
-        "timezone": "Australia/Sydney",
+        "timezone": timezone,
     }
     responses = await om.weather_api(url, params=params)
 
@@ -64,7 +64,8 @@ async def get_forecast(latitude: float, longitude: float) -> list[dict]:
     }
 
     hourly_dataframe = pd.DataFrame(data=hourly_data)
-    hourly_dataframe = hourly_dataframe.head(24)
+    hourly_dataframe = hourly_dataframe.head(24 * 3)
+    hourly_dataframe["datetime"] = hourly_dataframe["datetime"].dt.tz_convert(timezone)
     hourly_dataframe["date"] = hourly_dataframe["datetime"].dt.date
 
     daily = response.Daily()
@@ -81,12 +82,15 @@ async def get_forecast(latitude: float, longitude: float) -> list[dict]:
     }
 
     daily_dataframe = pd.DataFrame(data=daily_data)
-    daily_dataframe = daily_dataframe.head(2)
+    daily_dataframe["datetime"] = daily_dataframe["datetime"].dt.tz_convert(timezone)
     daily_dataframe["date"] = daily_dataframe["datetime"].dt.date
 
-    result = pd.merge(hourly_dataframe, daily_dataframe, on="date", how="inner")
+    result = pd.merge(
+        hourly_dataframe, daily_dataframe, on="date", how="inner", suffixes=("", "_y")
+    )
+    result = result.drop("datetime_y", axis=1)
 
-    return result.to_dict('records')
+    return result.to_dict("records")
 
 
 if __name__ == "__main__":
