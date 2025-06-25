@@ -7,8 +7,8 @@ mcp = FastMCP("laundry")
 
 
 @mcp.tool()
-async def get_fabric_types() -> list:
-    return ["light-fabrics, typical-fabrics, heavy-fabrics"]
+async def get_fabric_types() -> list[str]:
+    return ["light-fabrics", "typical-fabrics", "heavy-fabrics"]
 
 
 @mcp.tool()
