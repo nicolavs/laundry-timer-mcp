@@ -15,3 +15,11 @@ planning.
 
 For example, you could ask: "Is it a good time to do my laundry today at Sydney, NSW?"
 
+## Further Improvements
+
+### Detailed Electricity Time-of-Use (TOU) Tariffs
+
+To make the laundry planning even smarter, the server could be enhanced to include information about electricity
+pricing. By integrating with a data source for Time-of-Use (TOU) tariffs, the assistant could identify periods of the
+day when electricity is least expensive.
+
