@@ -13,7 +13,25 @@ line-drying is the preferred method.
 When connected to an assistant like Claude Desktop, this MCP server allows for natural language queries about laundry
 planning.
 
-For example, you could ask: "Is it a good time to do my laundry today at Sydney, NSW?"
+You’ll need to add this server in the mcpServers key.
+
+```json
+{
+  "mcpServers": {
+    "laundry-timer": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/ABSOLUTE/PATH/TO/PARENT/FOLDER/laundry-timer-mcp",
+        "run",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+After that, for example, you could ask: "Is it a good time to do my laundry today at Sydney, NSW?"
 
 ## Further Improvements
 
