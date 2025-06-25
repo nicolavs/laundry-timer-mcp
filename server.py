@@ -12,7 +12,7 @@ async def get_fabric_types() -> list:
 
 
 @mcp.tool()
-async def get_preffered_drying_method() -> str:
+async def get_preferred_drying_method() -> str:
     return "line-drying"
 
 
